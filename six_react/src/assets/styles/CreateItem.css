@@ -1,0 +1,44 @@
+/* CreateItem */
+.createItem{
+  display: flex;
+  flex-direction: column;
+}
+.createItem-Head{
+  display: flex;
+  align-items: center;
+}
+.createItem-Head button{
+  width: 5rem;
+  height: 1.5rem;
+  margin-left: 1rem;
+  cursor: pointer;
+}
+.createItem-from{
+  display: flex;
+  flex-direction: column;
+}
+input{
+  width: 20rem;
+  height: 2rem;
+  margin-bottom: 1rem;
+  outline: none;
+}
+textarea{
+  width: 20rem;
+  height: 4rem;
+  margin-bottom: 1rem;
+  outline: none;
+}
+button{
+  width: 20rem;
+  cursor: pointer;
+  height: 2rem;
+  background-color: cornflowerblue;
+  border:0;
+  color:#fff;
+  border-radius: 1rem;
+  -webkit-border-radius: 1rem;
+  -moz-border-radius: 1rem;
+  -ms-border-radius: 1rem;
+  -o-border-radius: 1rem;
+}
