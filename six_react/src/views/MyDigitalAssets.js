@@ -3,14 +3,12 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Web3Modal from "web3modal";
 import "../assets/styles/MyDigitalAssets.css";
+import Model from "./Model.js";
 
 import NFT from "../contracts/NFT_ABI.json";
 import Market from "../contracts/Mkt_ABI.json";
-const nftaddress =
-  "0x90fe47327d2e2851fD4eFEd32bc64c4b14CB1D29";
 
-const nftmarketaddress =
-  "0xFC2Ea5A1F3Bed1B545A6be182BF52C20B5e45921";
+import {nftaddress, nftmarketaddress } from '../config'
 
 export default function MyAssets() {
   const [nfts, setNfts] = useState([]);
@@ -34,18 +32,28 @@ export default function MyAssets() {
     );
     const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider);
     const data = await marketContract.fetchMyNFTs();
-
+    // console.log(data);
     const items = await Promise.all(
       data.map(async (i) => {
         const tokenUri = await tokenContract.tokenURI(i.tokenId);
-        const meta = await axios.get(tokenUri);
+        console.log(tokenUri);
+        let mtl = `${tokenUri}/1.mtl`;
+        console.log(mtl);
+        let obj = `${tokenUri}/1.obj`;
+        const meta = await axios.get(`${tokenUri}/test.json`);
+        console.log(meta);
         let price = ethers.utils.formatUnits(i.price.toString(), "ether");
         let item = {
           price,
           tokenId: i.tokenId.toNumber(),
           seller: i.seller,
           owner: i.owner,
-          image: meta.data.image,
+          // image: meta.data.image,
+          addr: tokenUri,
+          mtl,
+          obj,
+          name: meta.data.name,
+          description: meta.data.description,
         };
         return item;
       })
@@ -72,11 +80,20 @@ export default function MyAssets() {
         <div className="MyDigitalAssets-Box">
           {nfts.map((nft, i) => (
             <div key={i} className="MyDigitalAssets-Box-item">
-              <img
-                style={{ width: "16rem" }}
-                src={nft.image}
-                className="rounded"
-              />
+              <div
+                className="model"
+                style={{
+                  width: "16rem",
+                  height: "14rem",
+                  borderRadius: "0.5rem 0.5rem 0 0",
+                }}
+              >
+                <Model className="modelchild" data={nft} />
+              </div>
+              <div className="MyDigitalAssets-Box-item-info">
+                <h3>{nft.name}</h3>
+                <p>{nft.description}</p>
+              </div>
               <div className="MyDigitalAssets-Box-item-price">
                 <p className="text-2xl font-bold text-white">
                   Price - {nft.price} Eth

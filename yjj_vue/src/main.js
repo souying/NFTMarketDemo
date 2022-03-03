@@ -12,7 +12,7 @@ Vue.use(ElementUI);
 // 引入样式重置表
 import "../src/assets/css/reset.css"
 
-new Vue({
+Vue.prototype.bus = new Vue({
   router,
   store,
   render: h => h(App)

@@ -1,14 +1,18 @@
 <template>
   <div class="create">
     <!-- 我NFT上拥有的并且未上传到Market商城的列表展示 -->
-    <h1>Unsold goods</h1>
+    <h1>Goods not on the shelves</h1>
     <div class="sell-showBox">
       <div
         class="sell-showBox-one"
         v-for="(item, index) in unsoldGoods"
         :key="index"
       >
-        <img :src="item.image" alt="" />
+        <Three
+          class="sell_showBox_model"
+          :modelName="item.modelUri"
+          :ids="index + 'a'"
+        ></Three>
         <h2>
           {{ item.name }}
         </h2>
@@ -23,41 +27,73 @@
         </div>
       </div>
     </div>
+    <!-- 我上传至Market商城未出售的列表展示 -->
+    <h1>Unsold goods</h1>
+    <div class="sell-showBox">
+      <div
+        class="sell-showBox-one"
+        v-for="(item, index) in notsoldCommodity"
+        :key="index"
+      >
+        <Three
+          class="sell_showBox_model"
+          :modelName="item.modelUri"
+          :ids="index + 'b'"
+        ></Three>
+        <h2>
+          {{ item.name }}
+        </h2>
+        <p>{{ item.description }}</p>
+        <div class="sell-showBox-one-bottom">
+          <h3>{{ item.price }} ETH</h3>
+          <button @click="offNft(item)">Off the shelf</button>
+        </div>
+      </div>
+    </div>
     <!-- 我上传至Market商城已经出售的列表展示 -->
-    <h1>The goods I sell</h1>
+    <h1>Goods sold</h1>
     <div class="sell-showBox">
       <div
         class="sell-showBox-one"
         v-for="(item, index) in sellCommodity"
         :key="index"
       >
-        <img :src="item.image" alt="" />
+        <Three
+          class="sell_showBox_model"
+          :modelName="item.modelUri"
+          :ids="index + 'c'"
+        ></Three>
         <h2>
           {{ item.name }}
         </h2>
         <p>{{ item.description }}</p>
         <div class="sell-showBox-one-bottom">
           <h3>{{ item.price }} ETH</h3>
-          <!-- <button @click="buyNft(item)">Buy</button> -->
+          <!-- <button>Buy</button> -->
         </div>
       </div>
     </div>
     <!-- 我上传至Market商城所有的列表展示 -->
-    <h1>My products on the shelves</h1>
+    <h1>All goods</h1>
     <div class="sell-showBox">
       <div
         class="sell-showBox-one"
         v-for="(item, index) in uploadGoods"
         :key="index"
       >
-        <img :src="item.image" alt="" />
+        <!-- <img :src="item.image" alt="" /> -->
+        <Three
+          class="sell_showBox_model"
+          :modelName="item.modelUri"
+          :ids="index + 'd'"
+        ></Three>
         <h2>
           {{ item.name }}
         </h2>
         <p>{{ item.description }}</p>
         <div class="sell-showBox-one-bottom">
           <h3>{{ item.price }} ETH</h3>
-          <!-- <button @click="buyNft(item)">Buy</button> -->
+          <!-- <button>Buy</button> -->
         </div>
       </div>
     </div>
@@ -65,79 +101,70 @@
 </template>
 
 <script>
+//引入three相关文件
+import three from "../../components/three.vue";
 // 引入相关文件
 import axios from "axios";
+//abi接口封装函数
+import abiContract from "../../assets/js/abi.js";
 import { ethers } from "ethers"; //引入ethers.js
-import Web3Modal from "web3modal"; //引入web3modal
-// NFT合约
-import NFT from "../../abi/NFT01_ABI.json"; // 引入abi
-const nftaddress = "0x90fe47327d2e2851fD4eFEd32bc64c4b14CB1D29";
-// Market合约
-import Market from "../../abi/Mkt_ABI.json"; // 引入abi
-const nftmarketaddress = "0xFC2Ea5A1F3Bed1B545A6be182BF52C20B5e45921";
 export default {
   name: "Home",
   // 模板引入
-  components: {},
+  components: {
+    Three: three,
+  },
   // 数据
   data() {
     return {
       unsoldGoods: [], //未上架商品
       sellCommodity: [], //出售商品
-      uploadGoods: [], //上架商品
+      uploadGoods: [], //上架的所有商品
+      notsoldCommodity: [], //未出售商品
       price: "", //价格
     };
   },
   // 方法
   methods: {
     async loadNFTs() {
-      //连接账户
-      const web3Modal = new Web3Modal({
-        network: "mainnet",
-        cacheProvider: true,
-      });
-      const connection = await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(connection);
-      const signer = provider.getSigner();
-      //获取传到nft上的所有数据
-      const nftContract = new ethers.Contract(nftaddress, NFT.abi, signer);
-      const nftdata = await nftContract.fetchMyNFTs();
-      //通过axios获取到ipfs上的数据遍历数据，处理数据
+      //重新构建abiContract引进函数
+      let contract = await new abiContract();
+      const nftdata = await contract.nftContract.fetchMyNFTs();
+      //获取到所有nft
       const nftitems = await Promise.all(
         nftdata.map(async (i) => {
-          const meta = await axios.get(i.uri);
+          //处理文字
+          const meta = await axios.get(`${i.uri}/test.json`);
           let item = {
             itemId: i.itemId.toNumber(),
+            tokenId: i.tokenId.toNumber(),
             owner: i.owner,
-            image: meta.data.image,
+            modelUri: i.uri,
             name: meta.data.name,
             description: meta.data.description,
           };
           return item;
         })
       );
+      console.log(nftitems);
       this.unsoldGoods = nftitems;
+
       //获取传到market上的所有数据
-      const marketContract = new ethers.Contract(
-        nftmarketaddress,
-        Market.abi,
-        signer
-      );
       //通过nft中的合约的tokenURI方法，获取到ifps上的数据遍历赋值
-      const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider);
-      const tokendata = await marketContract.fetchItemsCreated();
+      const tokendata = await contract.marketContract.fetchItemsCreated();
       const tokenitems = await Promise.all(
         tokendata.map(async (i) => {
-          const tokenUri = await tokenContract.tokenURI(i.tokenId);
-          const meta = await axios.get(tokenUri);
+          const tokenUri = await contract.tokenContract.tokenURI(i.tokenId);
+          //处理文字
+          const meta = await axios.get(`${tokenUri}/test.json`);
           let price = ethers.utils.formatUnits(i.price.toString(), "ether");
           let item = {
             price,
             tokenId: i.tokenId.toNumber(),
-            seller: i.seller,
+            itemId: i.itemId.toNumber(),
             owner: i.owner,
             sold: i.sold,
-            image: meta.data.image,
+            modelUri: tokenUri,
             name: meta.data.name,
             description: meta.data.description,
           };
@@ -145,55 +172,73 @@ export default {
         })
       );
       /* create a filtered array of items that have been sold */
+      // 通过sold筛选，false表示未出售
+      const notsoldItems = tokenitems.filter((i) => !i.sold);
       // 通过sold筛选，true表示已经出售
-      const soldItems = tokenitems.filter((i) => i.sold);
-      // console.log(soldItems);
-      // console.log(tokenitems);
-      //我上传到ntf上所有的
+      const sellItems = tokenitems.filter((i) => i.sold);
+      // 未出售的
+      this.notsoldCommodity = notsoldItems;
+      // 已经出售的
+      this.sellCommodity = sellItems;
+      // 上架所有的记录
       this.uploadGoods = tokenitems;
-      //我已经出售的
-      this.sellCommodity = soldItems;
     },
-    //上传到market
     async uploadMarket(item) {
+      //上传到market
       if (item.price > 0) {
-        // 建立连接
-        const web3Modal = new Web3Modal({
-          network: "mainnet",
-          cacheProvider: true,
-        });
-        const connection = await web3Modal.connect();
-        const provider = new ethers.providers.Web3Provider(connection);
-        const signer = provider.getSigner();
-        // /* then list the item for sale on the marketplace */
-        // 拿到相关数据后传入到market合约（市场）上面
-        let contract = new ethers.Contract(
-          nftmarketaddress,
-          Market.abi,
-          signer
-        );
+        // // /* then list the item for sale on the marketplace */
+        //重新构建abiContract引进函数
+        let contract = await new abiContract();
         // 转换价格单位
         const price = ethers.utils.parseUnits(item.price, "ether");
-        let listingPrice = await contract.getListingPrice();
+        let listingPrice = await contract.marketContract.getListingPrice();
         listingPrice = listingPrice.toString();
-        //数据上传market合约上
-        let transaction = await contract.createMarketItem(
-          nftaddress,
+        // 拿到相关数据后传入到market合约（市场）上面
+        let transaction = await contract.marketContract.createMarketItem(
+          contract.nftaddress,
           item.itemId,
           price,
-          { value: listingPrice }
+          {
+            value: listingPrice,
+          }
         );
-        // console.log(transaction);
         // 数据刷新
         await transaction.wait();
+        this.loadNFTs();
         if (transaction) {
-          this.$message.warning("上传market市场成功");
-          this.$router.push({
-            path: "/index/SellDigitalAsset",
+          this.$alert("上传失败", "失败", {
+            dangerouslyUseHTMLString: true,
+          });
+        } else {
+          this.$alert("上传失败", "失败", {
+            dangerouslyUseHTMLString: true,
           });
         }
       } else {
         console.log("请输入正确价格");
+      }
+    },
+    async offNft(item) {
+      //下架market上的商品
+      //重新构建abiContract引进函数
+      let contract = await new abiContract();
+      //数据上传nft合约上
+      let transaction = await contract.marketContract.recallSellingItem(
+        contract.nftaddress,
+        item.itemId
+      );
+      // 数据刷新
+      await transaction.wait();
+      this.loadNFTs();
+      if (transaction) {
+        this.$message.warning("从market市场下架成功");
+        this.$router.push({
+          path: "/index/SellDigitalAsset",
+        });
+      } else {
+        this.$alert("下架失败", "失败", {
+          dangerouslyUseHTMLString: true,
+        });
       }
     },
   },
@@ -233,10 +278,11 @@ export default {
       display: flex;
       flex-direction: column;
       margin: 1rem;
-      img {
-        width: 16rem;
-        height: 17rem;
-        border-radius: 0.5rem 0.5rem 0 0;
+      .sell_showBox_model {
+        margin: 5px auto 0;
+        width: 200px;
+        height: 200px;
+        border-radius: 0.5rem;
       }
       h2 {
         text-align: left;
@@ -258,6 +304,7 @@ export default {
           padding: 0.7rem;
           font-size: 16px;
           .elinput {
+            width: 6rem;
             line-height: 1.6rem;
           }
         }

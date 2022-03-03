@@ -5,7 +5,7 @@ Vue.use(VueRouter);
 
 const routes = [
   {
-    path:'/',
+    path: '/',
     redirect: '/index/Home'
   },
   {
@@ -40,6 +40,16 @@ const routes = [
         name: "/index/SellDigitalAsset",
         component: () => import("../views/modules/SellDigitalAsset.vue")
       },
+      {
+        path: "/index/MyPledged",
+        name: "/index/MyPledgeds",
+        component: () => import("../views/modules/MyPledged.vue")
+      },
+      {
+        path: "/index/CreateItemss",
+        name: "/index/CreateItemss",
+        component: () => import("../views/modules/CreateItemss.vue")
+      }
     ],
   },
 ];

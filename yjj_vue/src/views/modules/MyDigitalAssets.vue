@@ -1,5 +1,5 @@
 <template>
-  <div class="my">
+  <div id="MyDigitalAssets">
     <!-- 我拥有的商品列表展示 -->
     <h1>My Digital Assets</h1>
     <div class="sell-showBox">
@@ -8,7 +8,12 @@
         v-for="(item, index) in commodity"
         :key="index"
       >
-        <img :src="item.image" alt="" />
+        <Three
+          class="sell_showBox_model"
+          :modelName="item.modelUri"
+          :ids="index"
+        ></Three>
+        <!-- <img :src="item.image" alt="" /> -->
         <h2>
           {{ item.name }}
         </h2>
@@ -23,22 +28,20 @@
 </template>
 
 <script>
-// 引入相关文件
+//引入three相关文件
+import three from "../../components/three.vue";
 // 引入相关文件
 import axios from "axios";
 import { ethers } from "ethers"; //引入ethers.js
-import Web3Modal from "web3modal"; //引入web3modal
-// NFT合约
-import NFT from "../../abi/NFT01_ABI.json"; // 引入abi
-const nftaddress = "0x90fe47327d2e2851fD4eFEd32bc64c4b14CB1D29";
-// Market合约
-import Market from "../../abi/Mkt_ABI.json"; // 引入abi
-const nftmarketaddress = "0xFC2Ea5A1F3Bed1B545A6be182BF52C20B5e45921";
+//abi接口封装函数
+import abiContract from "../../assets/js/abi.js";
 
 export default {
-  name: "my",
+  name: "MyDigitalAssets",
   // 模板引入
-  components: {},
+  components: {
+    Three: three,
+  },
   // 数据
   data() {
     return {
@@ -48,33 +51,24 @@ export default {
   // 方法
   methods: {
     async loadNFTs() {
-      const web3Modal = new Web3Modal({
-        network: "mainnet",
-        cacheProvider: true,
-      });
-      const connection = await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(connection);
-      const signer = provider.getSigner();
-      //通过market合约，查看我购买的所有商品
-      const marketContract = new ethers.Contract(
-        nftmarketaddress,
-        Market.abi,
-        signer
-      );
-      const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider);
-      const data = await marketContract.fetchMyNFTs();
+      //重新构建abiContract引进函数
+      let contract = await new abiContract();
+      //获取数据
+      const data = await contract.marketContract.fetchMyNFTs();
       const items = await Promise.all(
         data.map(async (i) => {
-          const tokenUri = await tokenContract.tokenURI(i.tokenId);
-          let meat1 = tokenUri.replace(/"/gi, "");
-          const meta = await axios.get(meat1);
+          const tokenUri = await contract.tokenContract.tokenURI(i.tokenId);
+          // console.log(tokenUri);
+          //处理文字
+          const meta = await axios.get(`${tokenUri}/test.json`);
           let price = ethers.utils.formatUnits(i.price.toString(), "ether");
           let item = {
             price,
+            itemId: i.tokenId.toNumber(),
             tokenId: i.tokenId.toNumber(),
             seller: i.seller,
             owner: i.owner,
-            image: meta.data.image,
+            modelUri: tokenUri,
             name: meta.data.name,
             description: meta.data.description,
           };
@@ -97,7 +91,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.my {
+#MyDigitalAssets {
   // 关于页展示数据盒子
   .sell-showBox {
     margin: auto;
@@ -121,11 +115,17 @@ export default {
       display: flex;
       flex-direction: column;
       margin: 1rem;
-      img {
-        width: 16rem;
-        height: 17rem;
-        border-radius: 0.5rem 0.5rem 0 0;
+      .sell_showBox_model {
+        margin: 5px auto 0;
+        width: 200px;
+        height: 200px;
+        border-radius: 0.5rem;
       }
+      // img {
+      //   width: 16rem;
+      //   height: 17rem;
+      //   border-radius: 0.5rem 0.5rem 0 0;
+      // }
       h2 {
         text-align: left;
         margin: 1rem 0 1.5rem 1rem;

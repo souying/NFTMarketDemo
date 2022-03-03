@@ -3,20 +3,21 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Web3Modal from "web3modal";
 import "../assets/styles/SellDigitalAsset.css";
+import Model from "./Model";
 
 import NFT from "../contracts/NFT_ABI.json";
 import Market from "../contracts/Mkt_ABI.json";
-const nftaddress =
-  "0x90fe47327d2e2851fD4eFEd32bc64c4b14CB1D29";
 
-const nftmarketaddress =
-  "0xFC2Ea5A1F3Bed1B545A6be182BF52C20B5e45921";
+import {nftaddress, nftmarketaddress } from '../config'
 
-let rpcEndpoint = "http://192.168.11.120:8545";
+// let rpcEndpoint = "https://bsc-dataseed1.binance.org/";
+// let rpcEndpoint =
+//   "https://ropsten.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161";
+let rpcEndpoint = "http://192.168.11.120:8545/";
 
-if (process.env.NEXT_PUBLIC_WORKSPACE_URL) {
-  rpcEndpoint = process.env.NEXT_PUBLIC_WORKSPACE_URL;
-}
+// if (process.env.NEXT_PUBLIC_WORKSPACE_URL) {
+//   rpcEndpoint = process.env.NEXT_PUBLIC_WORKSPACE_URL;
+// }
 
 export default function Home() {
   const [nfts, setNfts] = useState([]);
@@ -33,27 +34,59 @@ export default function Home() {
       provider
     );
     const data = await marketContract.fetchMarketItems();
+    console.log(data);
     const items = await Promise.all(
       data.map(async (i) => {
         const tokenUri = await tokenContract.tokenURI(i.tokenId);
-        let _tokenUri = tokenUri.replace(/"/gi, "");
-        const meta = await axios.get(_tokenUri);
-
+        console.log(tokenUri);
+        let mtl = `${tokenUri}/1.mtl`;
+        let obj = `${tokenUri}/1.obj`;
+        let txt = `${tokenUri}/Introduction.txt`;
+        // let _tokenUri = tokenUri.replace(/"/gi, "");
+        const meta = await axios.get(`${tokenUri}/test.json`);
+        console.log(meta);
         let price = ethers.utils.formatUnits(i.price.toString(), "ether");
+
         let item = {
           price,
           itemId: i.itemId.toNumber(),
           seller: i.seller,
           owner: i.owner,
-          image: meta.data.image,
+          addr: tokenUri,
+          mtl,
+          obj,
+          txt,
+          // image: meta.data.image,
           name: meta.data.name,
           description: meta.data.description,
         };
+
+        // 转换cost为ether单位的BigNumber类型
+        const costBigNumber = ethers.utils.parseEther(`${item.itemId}`);
+        console.log(costBigNumber);
+        // 转换cost为 wei单位的BigNumber类型
+        // const costWei = ethers.utils.bigNumberify(21000).mul(`${item.itemId}`)
+        // console.log(costWei);
         return item;
       })
     );
     setNfts(items);
+    console.log(items);
     setLoadingState("loaded");
+
+    // 测试
+    // await tokenContract.symbol().then((res) => {
+    //   console.log(res);
+    // });
+    // console.log(111);
+    // // await marketContract.getListingPrice().then(res => {
+    // //   console.log(res);
+    // // });
+    // await tokenContract
+    //   .fetchAddressNFTs("0xE9f6d5F43b6D61d6cC146aafCB3E5Af3C8f774E5")
+    //   .then((res) => {
+    //     console.log(res);
+    //   });
   }
   // buyBtn
   async function buyNft(nft) {
@@ -62,10 +95,8 @@ export default function Home() {
     const provider = new ethers.providers.Web3Provider(connection);
     const signer = provider.getSigner();
     const contract = new ethers.Contract(nftmarketaddress, Market.abi, signer);
-    
 
     const price = ethers.utils.parseUnits(nft.price.toString(), "ether");
-    console.log(nft.itemId,nftaddress);
     const transaction = await contract.createMarketSale(
       nftaddress,
       nft.itemId,
@@ -73,7 +104,7 @@ export default function Home() {
         value: price,
       }
     );
-    
+
     await transaction.wait();
     loadNFTs();
   }
@@ -96,14 +127,28 @@ export default function Home() {
         <div className="SellDigitalAsset-Box-content">
           {nfts.map((nft, i) => (
             <div key={i} className="SellDigitalAsset-Box-content-item">
-              <img src={nft.image} />
+              {/* <img src={nft.image} /> */}
+              <div
+                className="model"
+                style={{
+                  width: "16rem",
+                  height: "14rem",
+                  borderRadius: "0.5rem 0.5rem 0 0",
+                }}
+              >
+                <Model className="modelchild" data={nft} />
+              </div>
               <div className="SellDigitalAsset-Box-content-item-info">
                 <p className="SellDigitalAsset-Box-content-item-info-name">
                   {nft.name}
                 </p>
-                <div style={{ height: "4rem", overflow: "hidden" }}>
+                <div style={{ height: "3rem", overflow: "hidden" }}>
                   <p
-                    style={{ paddingLeft: "1rem", fontSize: "14px" }}
+                    style={{
+                      paddingLeft: "1rem",
+                      fontSize: "14px",
+                      paddingTop: "0.5rem",
+                    }}
                     className="text-gray-400"
                   >
                     {nft.description}
@@ -116,6 +161,7 @@ export default function Home() {
                     textIndent: "1rem",
                     fontWeight: "bold",
                     fontSize: "18px",
+                    paddingTop: "1rem",
                   }}
                 >
                   {nft.price} ETH

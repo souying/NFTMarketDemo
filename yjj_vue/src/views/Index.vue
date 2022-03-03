@@ -8,7 +8,7 @@
         active-text-color="#6495ed"
         unique-opened
         router
-        :default-active="$route.path" 
+        :default-active="$route.path"
       >
         <div v-for="obj in treelist" :key="obj.index">
           <el-menu-item :index="obj.index">
@@ -28,7 +28,7 @@
       <!-- 右-身 -->
       <el-main>
         <el-card>
-          <router-view></router-view>
+          <router-view :accountId="accountId" :balanceNum="balanceNum"></router-view>
         </el-card>
       </el-main>
     </el-container>
@@ -37,8 +37,10 @@
 
 <script>
 export default {
+  props: ["accountId","balanceNum"],
   data() {
     return {
+      accountIds: "", //账号
       treelist: [
         { index: "/index/Home", i: "el-icon-star-off", text: "Home" },
         {
@@ -61,6 +63,16 @@ export default {
           i: "el-icon-s-check",
           text: "My Digital Assets",
         },
+        {
+          index: "/index/MyPledged",
+          i: "el-icon-s-check",
+          text: "My Pledged",
+        },
+        // {
+        //   index: "/index/CreateItemss",
+        //   i: "el-icon-s-check",
+        //   text: "CreateItemss",
+        // },
       ],
     };
   },
@@ -77,7 +89,8 @@ export default {
   height: 100%;
 
   .el-aside {
-    background-color: #2C3E50;
+    background-color: #2c3e50;
+    // height: 100%;
   }
 
   .el-header {

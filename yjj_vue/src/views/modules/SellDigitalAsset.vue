@@ -8,7 +8,11 @@
         v-for="(item, index) in commodity"
         :key="index"
       >
-        <img :src="item.image" alt="" />
+        <Three
+          class="sell_showBox_model"
+          :modelName="item.modelUri"
+          :ids="index"
+        ></Three>
         <h2>
           {{ item.name }}
         </h2>
@@ -23,24 +27,24 @@
 </template>
 
 <script>
+//引入three相关文件
+import three from "../../components/three.vue";
 // 引入相关文件
 import axios from "axios";
 import { ethers } from "ethers"; //引入ethers.js
-import Web3Modal from "web3modal"; //引入web3modal
-// console.log(ethers);
 // 交易合约
-import NFT from "../../abi/NFT01_ABI.json"; // 引入abi
-const nftaddress = "0x90fe47327d2e2851fD4eFEd32bc64c4b14CB1D29";
+import NFT from "../../abi/NFT_ABI.json"; // 引入abi
 // 市场合约
 import Market from "../../abi/Mkt_ABI.json"; // 引入abi
-const nftmarketaddress = "0xFC2Ea5A1F3Bed1B545A6be182BF52C20B5e45921";
 
-// console.log("tokenContract:", tokenContract);
-// console.log("marketContract:", marketContract);
+//abi接口封装函数
+import abiContract from "../../assets/js/abi.js";
 export default {
   name: "sell",
   // 模板引入
-  components: {},
+  components: {
+    Three: three,
+  },
   // 数据
   data() {
     return {
@@ -51,17 +55,20 @@ export default {
   methods: {
     //调用合约查询数据
     async callContract() {
-      // 网关地址
-      // const url = "http://192.168.11.120:8545";
-      //创立连接
-      // const provider = new ethers.providers.JsonRpcProvider(url);
+      // 建立连接
       const provider = new ethers.providers.JsonRpcProvider(
         "http://192.168.11.120:8545"
       );
+      //重新构建abiContract引进函数
+      let contract = await new abiContract();
       // 构建合约与abi
-      const tokenContract = new ethers.Contract(nftaddress, NFT.abi, provider);
-      const marketContract = new ethers.Contract(
-        nftmarketaddress,
+      let tokenContract = new ethers.Contract(
+        contract.nftaddress,
+        NFT.abi,
+        provider
+      );
+      let marketContract = new ethers.Contract(
+        contract.marketaddress,
         Market.abi,
         provider
       );
@@ -72,18 +79,16 @@ export default {
         data.map(async (i) => {
           //获取tokenid循环查询所有
           const tokenUri = await tokenContract.tokenURI(i.tokenId);
-          // console.log("tokenUri",tokenUri);
-          //注意，不是axios跨域问题，是地址拼接问题
-          let meat1 = tokenUri.replace(/"/gi, "");
-          const meta = await axios.get(meat1);
+          const meta = await axios.get(`${tokenUri}/test.json`);
           // 价格单位转换
           let price = ethers.utils.formatUnits(i.price.toString(), "ether");
           let item = {
             price,
             itemId: i.itemId.toNumber(),
+            tokenId: i.tokenId.toNumber(),
             seller: i.seller,
             owner: i.owner,
-            image: meta.data.image,
+            modelUri: tokenUri,
             name: meta.data.name,
             description: meta.data.description,
           };
@@ -95,22 +100,13 @@ export default {
     },
     // 去购买
     async buyNft(item) {
-      // console.log(item);
-      const web3Modal = new Web3Modal();
-      const connection = await web3Modal.connect();
-      const provider = new ethers.providers.Web3Provider(connection);
-      const signer = provider.getSigner();
-       //价格转换
+      //价格转换
       const price = ethers.utils.parseUnits(item.price.toString(), "ether");
-      // 使用nft合约进行购买
-      const contract = new ethers.Contract(
-        nftmarketaddress,
-        Market.abi,
-        signer
-      );
-      // console.log(nftaddress, item.itemId, price);
-      const transaction = await contract.createMarketSale(
-        nftaddress,
+      //重新构建abiContract引进函数
+      let contract = await new abiContract();
+      //进行购买
+      let transaction = await contract.marketContract.createMarketSale(
+        contract.nftaddress,
         item.itemId,
         {
           value: price,
@@ -167,10 +163,11 @@ export default {
       display: flex;
       flex-direction: column;
       margin: 1rem;
-      img {
-        width: 16rem;
-        height: 17rem;
-        border-radius: 0.5rem 0.5rem 0 0;
+      .sell_showBox_model {
+        margin: 5px auto 0;
+        width: 200px;
+        height: 200px;
+        border-radius: 0.5rem;
       }
       h2 {
         text-align: left;
@@ -193,6 +190,7 @@ export default {
           font-size: 16px;
         }
         button {
+          margin: auto auto;
           width: 100%;
           height: 1.5rem;
           background-color: #ea4c98;

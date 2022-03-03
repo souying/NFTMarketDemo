@@ -2,6 +2,7 @@
 .CreatorDashboard-Head{
   display: flex;
   align-items: center;
+  margin: 1rem;
 }
 .CreatorDashboard-Head button{
   width: 5rem;
@@ -19,19 +20,38 @@
 }
 .CreatorDashboard-items-Created{
   width: 16rem;
-  height: 20rem;
+  height: 22rem;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
   border-radius: 0.5rem;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-right: 1rem;
-  margin-bottom: 1rem;
+  margin: 1rem 0 0 1rem;
   -webkit-border-radius: 0.5rem;
   -moz-border-radius: 0.5rem;
   -ms-border-radius: 0.5rem;
   -o-border-radius: 0.5rem;
+}
+.CreatorDashboard-items-Created:hover{
+  border:1px solid #eee;
+  cursor: pointer;
+  transform: scale(1.05, 1.05);
+  -webkit-transform: scale(1.05, 1.05);
+  -moz-transform: scale(1.05, 1.05);
+  -ms-transform: scale(1.05, 1.05);
+  -o-transform: scale(1.05, 1.05);
+  -webkit-border-radius: 0.5rem 0.5rem;
+  -moz-border-radius: 0.5rem 0.5rem;
+  -ms-border-radius: 0.5rem 0.5rem;
+  -o-border-radius: 0.5rem 0.5rem;
+}
+.CreatorDashboard-items-Created .modelchild{
+  border-radius: 0.5rem 0.5rem 0 0;
+  -webkit-border-radius: 0.5rem 0.5rem 0 0;
+  -moz-border-radius: 0.5rem 0.5rem 0 0;
+  -ms-border-radius: 0.5rem 0.5rem 0 0;
+  -o-border-radius: 0.5rem 0.5rem 0 0;
 }
 .CreatorDashboard-items-sold{
   width: 16rem;
@@ -42,9 +62,66 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  margin-right: 1rem;
+  margin: 1rem 0 0 1rem;
   -webkit-border-radius: 0.5rem;
   -moz-border-radius: 0.5rem;
   -ms-border-radius: 0.5rem;
   -o-border-radius: 0.5rem;
+}
+.CreatorDashboard-items-sold:hover{
+  border:1px solid #eee;
+  cursor: pointer;
+  transform: scale(1.05, 1.05);
+  -webkit-transform: scale(1.05, 1.05);
+  -moz-transform: scale(1.05, 1.05);
+  -ms-transform: scale(1.05, 1.05);
+  -o-transform: scale(1.05, 1.05);
+}
+.CreatorDashboard-items-notSold{
+  width: 16rem;
+  height: 21rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 1rem 0 0 1rem;
+  -webkit-border-radius: 0.5rem;
+  -moz-border-radius: 0.5rem;
+  -ms-border-radius: 0.5rem;
+  -o-border-radius: 0.5rem;
+}
+.CreatorDashboard-items-notSold:hover{
+  border:1px solid #eee;
+  cursor: pointer;
+  transform: scale(1.05, 1.05);
+  -webkit-transform: scale(1.05, 1.05);
+  -moz-transform: scale(1.05, 1.05);
+  -ms-transform: scale(1.05, 1.05);
+  -o-transform: scale(1.05, 1.05);
+}
+.CreatorDashboard-items-all{
+  width: 16rem;
+  height: 20rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  margin: 1rem 0 0 1rem;
+  -webkit-border-radius: 0.5rem;
+  -moz-border-radius: 0.5rem;
+  -ms-border-radius: 0.5rem;
+  -o-border-radius: 0.5rem;
+}
+.CreatorDashboard-items-all:hover{
+  border:1px solid #eee;
+  cursor: pointer;
+  transform: scale(1.05, 1.05);
+  -webkit-transform: scale(1.05, 1.05);
+  -moz-transform: scale(1.05, 1.05);
+  -ms-transform: scale(1.05, 1.05);
+  -o-transform: scale(1.05, 1.05);
 }

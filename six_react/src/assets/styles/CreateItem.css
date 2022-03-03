@@ -2,37 +2,24 @@
 .createItem{
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12), 0 0 6px rgba(0, 0, 0, 0.04);
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  width: 50rem;
+  height: 44rem;
+  margin: 4rem auto;
 }
 .createItem-Head{
   display: flex;
   align-items: center;
+  margin: 1rem;
 }
 .createItem-Head button{
   width: 5rem;
   height: 1.5rem;
   margin-left: 1rem;
-  cursor: pointer;
-}
-.createItem-from{
-  display: flex;
-  flex-direction: column;
-}
-input{
-  width: 20rem;
-  height: 2rem;
-  margin-bottom: 1rem;
-  outline: none;
-}
-textarea{
-  width: 20rem;
-  height: 4rem;
-  margin-bottom: 1rem;
-  outline: none;
-}
-button{
-  width: 20rem;
-  cursor: pointer;
-  height: 2rem;
   background-color: cornflowerblue;
   border:0;
   color:#fff;
@@ -41,4 +28,47 @@ button{
   -moz-border-radius: 1rem;
   -ms-border-radius: 1rem;
   -o-border-radius: 1rem;
+  cursor: pointer;
 }
+.createItem-from{
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+.createItem-from-box{
+  display: flex;
+  flex-direction: column;
+  margin: 1rem;
+}
+.createItem-from-box h3{
+  margin: 1rem 0;
+}
+.createItem-from-box input{
+  width: 20rem;
+  height: 2rem;
+  margin-bottom: 1rem;
+  outline: none;
+}
+.createItem-from-box textarea{
+  width: 20rem;
+  height: 4rem;
+  margin-bottom: 1rem;
+  outline: none;
+}
+.createItem-from-box button{
+  width: 20rem;
+  cursor: pointer;
+  height: 2rem;
+  border:0;
+  background-color: rgb(113, 211, 113);
+  color:#fff;
+  border-radius: 1rem;
+  -webkit-border-radius: 1rem;
+  -moz-border-radius: 1rem;
+  -ms-border-radius: 1rem;
+  -o-border-radius: 1rem;
+}
+/* .createItem-from-box button:nth-child(2){
+  background: rgb(211, 113, 211);
+} */
